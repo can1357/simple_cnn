@@ -1,2 +1,2 @@
 # simple_cnn
-Simple Convolutional Neural Network Example
+Simple Header-only Convolutional Neural Network Example
