@@ -1,6 +1,6 @@
 # simple_cnn
 
-simple_cnn is a project ment to be an easy to understand and easy to use convolutional neural network example.
+simple_cnn is ment to be an easy to read and easy to use convolutional neural network library.
 
 simple_cnn also doesnt use virtual classes and avoids using std where its possible so that it is easy to convert to CUDA code when needed.
 
