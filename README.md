@@ -2,7 +2,7 @@
 
 simple_cnn is ment to be an easy to read and easy to use convolutional neural network library.
 
-simple_cnn also doesnt use virtual classes and avoids using std where its possible so that it is easy to convert to CUDA code when needed.
+simple_cnn is written in a mostly C-like manner behind the scenes, doesnt use virtual classes and avoids using std where its possible so that it is easier to convert to CUDA code when needed.
 
 
 Example use on handwritten digit recognition (Youtube Video):
