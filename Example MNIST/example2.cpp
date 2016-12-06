@@ -2,6 +2,7 @@
 #include <fstream>
 #include <algorithm>
 #include "CNN\cnn.h"
+#include <Windows.h>
 
 using namespace std;
 

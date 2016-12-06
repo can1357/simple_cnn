@@ -1,6 +1,5 @@
 #pragma once
 #include "layer_t.h"
-#include <Windows.h>
 
 #pragma pack(push, 1)
 struct fc_layer_t
@@ -100,7 +99,7 @@ struct fc_layer_t
 
 	void calc_grads( tensor_t<float>& grad_next_layer )
 	{
-		ZeroMemory( grads_in.data, grads_in.size.x *grads_in.size.y*grads_in.size.z * sizeof( float ) );
+		memset( grads_in.data, 0, grads_in.size.x *grads_in.size.y*grads_in.size.z * sizeof( float ) );
 		for ( int n = 0; n < out.size.x; n++ )
 		{
 			gradient_t& grad = gradients[n];

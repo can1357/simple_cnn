@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <Windows.h>
 #include "CNN\cnn.h"
 
 using namespace std;

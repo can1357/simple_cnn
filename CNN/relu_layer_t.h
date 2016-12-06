@@ -1,6 +1,5 @@
 #pragma once
 #include "layer_t.h"
-#include <Windows.h>
 
 #pragma pack(push, 1)
 struct relu_layer_t
