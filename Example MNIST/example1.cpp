@@ -118,7 +118,7 @@ int main()
     conv_layer_t * layer1 = new conv_layer_t( 1, 5, 8, cases[0].data.size );		// 28 * 28 * 1 -> 24 * 24 * 8
     relu_layer_t * layer2 = new relu_layer_t( layer1->out.size );               
     pool_layer_t * layer3 = new pool_layer_t( 2, 2, layer2->out.size );				// 24 * 24 * 8 -> 12 * 12 * 8
-	fc_layer_t * layer4 = new fc_layer_t(layer3->out.size, 10);					// 4 * 4 * 16 -> 10
+    fc_layer_t * layer4 = new fc_layer_t(layer3->out.size, 10);					// 4 * 4 * 16 -> 10
 
     layers.push_back( (layer_t*)layer1 );
     layers.push_back( (layer_t*)layer2 );
