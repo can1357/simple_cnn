@@ -9,12 +9,15 @@ struct dropout_layer_t
 	tensor_t<float> in;
 	tensor_t<float> out;
 	tensor_t<bool> hitmap;
+	float p_activation;
 
+	dropout_layer_t( tdsize in_size, float p_activation )
 		:
 		in( in_size.x, in_size.y, in_size.z ),
 		out( in_size.x, in_size.y, in_size.z ),
 		hitmap( in_size.x, in_size.y, in_size.z ),
 		grads_in( in_size.x, in_size.y, in_size.z ),
+		p_activation( p_activation )
 	{
 		
 	}
@@ -29,6 +32,7 @@ struct dropout_layer_t
 	{
 		for ( int i = 0; i < in.size.x*in.size.y*in.size.z; i++ )
 		{
+			bool active = (rand() % RAND_MAX) / float( RAND_MAX ) <= p_activation;
 			hitmap.data[i] = active;
 			out.data[i] = active ? in.data[i] : 0.0f;
 		}
