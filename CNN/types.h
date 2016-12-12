@@ -5,5 +5,6 @@ enum class layer_type
 	conv,
 	fc,
 	relu,
-	pool
+	pool,
+	dropout_layer
 };
