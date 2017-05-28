@@ -2,6 +2,7 @@
 #include "point_t.h"
 #include <cassert>
 #include <vector>
+#include <string.h>
 
 template<typename T>
 struct tensor_t
@@ -21,8 +22,10 @@ struct tensor_t
 	tensor_t( const tensor_t& other )
 	{
 		data = new T[other.size.x *other.size.y *other.size.z];
-		memcpy( this->data, other.data,
-				other.size.x *other.size.y *other.size.z * sizeof( T )
+		memcpy(
+			this->data,
+			other.data,
+			other.size.x *other.size.y *other.size.z * sizeof( T )
 		);
 		this->size = other.size;
 	}

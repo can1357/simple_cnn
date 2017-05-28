@@ -1,8 +1,11 @@
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <Windows.h>
-#include "CNN\cnn.h"
+#include "byteswap.h"
+#include "CNN/cnn.h"
 
 using namespace std;
 
@@ -59,7 +62,7 @@ struct case_t
 	tensor_t<float> out;
 };
 
-BYTE* read_file( const char* szFile )
+uint8_t* read_file( const char* szFile )
 {
 	ifstream file( szFile, ios::binary | ios::ate );
 	streamsize size = file.tellg();
@@ -68,7 +71,7 @@ BYTE* read_file( const char* szFile )
 	if ( size == -1 )
 		return nullptr;
 
-	BYTE* buffer = new BYTE[size];
+	uint8_t* buffer = new uint8_t[size];
 	file.read( (char*)buffer, size );
 	return buffer;
 }
@@ -77,21 +80,17 @@ vector<case_t> read_test_cases()
 {
 	vector<case_t> cases;
 
-	BYTE* train_image = read_file( "train-images.idx3-ubyte" );
-	BYTE* train_labels = read_file( "train-labels.idx1-ubyte" );
+	uint8_t* train_image = read_file( "train-images.idx3-ubyte" );
+	uint8_t* train_labels = read_file( "train-labels.idx1-ubyte" );
 
-	uint32_t case_count = _byteswap_ulong( *(uint32_t*)(train_image + 4) );
+	uint32_t case_count = byteswap_uint32( *(uint32_t*)(train_image + 4) );
 
 	for ( int i = 0; i < case_count; i++ )
 	{
-		case_t c
-		{
-			tensor_t<float>( 28, 28, 1 ),
-			tensor_t<float>( 10, 1, 1 )
-		};
+		case_t c {tensor_t<float>( 28, 28, 1 ), tensor_t<float>( 10, 1, 1 )};
 
-		BYTE* img = train_image + 16 + i * (28 * 28);
-		BYTE* label = train_labels + 8 + i;
+		uint8_t* img = train_image + 16 + i * (28 * 28);
+		uint8_t* label = train_labels + 8 + i;
 
 		for ( int x = 0; x < 28; x++ )
 			for ( int y = 0; y < 28; y++ )
@@ -110,92 +109,98 @@ vector<case_t> read_test_cases()
 
 int main()
 {
-	
-    vector<case_t> cases = read_test_cases();
-   
-    vector<layer_t*> layers;
-   
-    conv_layer_t * layer1 = new conv_layer_t( 1, 5, 8, cases[0].data.size );		// 28 * 28 * 1 -> 24 * 24 * 8
-    relu_layer_t * layer2 = new relu_layer_t( layer1->out.size );               
-    pool_layer_t * layer3 = new pool_layer_t( 2, 2, layer2->out.size );				// 24 * 24 * 8 -> 12 * 12 * 8
+
+	vector<case_t> cases = read_test_cases();
+
+	vector<layer_t*> layers;
+
+	conv_layer_t * layer1 = new conv_layer_t( 1, 5, 8, cases[0].data.size );		// 28 * 28 * 1 -> 24 * 24 * 8
+	relu_layer_t * layer2 = new relu_layer_t( layer1->out.size );
+	pool_layer_t * layer3 = new pool_layer_t( 2, 2, layer2->out.size );				// 24 * 24 * 8 -> 12 * 12 * 8
 	fc_layer_t * layer4 = new fc_layer_t(layer3->out.size, 10);					// 4 * 4 * 16 -> 10
 
-    layers.push_back( (layer_t*)layer1 );
-    layers.push_back( (layer_t*)layer2 );
-    layers.push_back( (layer_t*)layer3 );
-    layers.push_back( (layer_t*)layer4 );
+	layers.push_back( (layer_t*)layer1 );
+	layers.push_back( (layer_t*)layer2 );
+	layers.push_back( (layer_t*)layer3 );
+	layers.push_back( (layer_t*)layer4 );
 
 
 
-    float amse = 0;
-    int ic = 0;
+	float amse = 0;
+	int ic = 0;
 
-    for ( long ep = 0;; )
-    {
+	for ( long ep = 0; ep < 100000; )
+	{
 
-        for ( case_t& t : cases )
-        {
-            float xerr = train( layers, t.data, t.out );
-            amse += xerr;
-           
-            ep++;
-            ic++;
+		for ( case_t& t : cases )
+		{
+			float xerr = train( layers, t.data, t.out );
+			amse += xerr;
 
-            if ( ep % 1000 == 0 )
-                cout << "case " << ep << " err=" << amse/ic << endl;
+			ep++;
+			ic++;
 
-            if ( GetAsyncKeyState( VK_F1 ) & 0x8000 )
-            {
-                printf( "err=%.4f%\n", amse / ic  );
-                goto end;
-            }
-        }
-    }
-    end:
+			if ( ep % 1000 == 0 )
+				cout << "case " << ep << " err=" << amse/ic << endl;
+
+			// if ( GetAsyncKeyState( VK_F1 ) & 0x8000 )
+			// {
+			//	   printf( "err=%.4f%\n", amse / ic  );
+			//	   goto end;
+			// }
+		}
+	}
+	// end:
 
 
 
-    while ( true )
-    {
-        BYTE * data = read_file( "test.ppm" );
+	while ( true )
+	{
+		uint8_t * data = read_file( "test.ppm" );
 
-        if ( data )
-        {
-            BYTE * usable = data;
+		if ( data )
+		{
+			uint8_t * usable = data;
 
-            while ( *(DWORD*)usable != 0x0A353532 )
-                usable++;
+			while ( *(uint32_t*)usable != 0x0A353532 )
+				usable++;
 
-            #pragma pack(push, 1)
-            struct RGB
-            {
-                BYTE r, g, b;
-            };
-            #pragma pack(pop)
+#pragma pack(push, 1)
+			struct RGB
+			{
+				uint8_t r, g, b;
+			};
+#pragma pack(pop)
 
-            RGB * rgb = (RGB*)usable;
+			RGB * rgb = (RGB*)usable;
 
-            tensor_t<float> image(28, 28, 1);
-            for ( int i = 0; i < 28; i++ )
-            {
-                for ( int j = 0; j < 28; j++ )
-                {
-                    RGB rgb_ij = rgb[i * 28 + j];
-                    image( j, i, 0 ) = ((((float)rgb_ij.r + rgb_ij.g + rgb_ij.b) / (3.0f*255.f)));
-                }
-            }
+			tensor_t<float> image(28, 28, 1);
+			for ( int i = 0; i < 28; i++ )
+			{
+				for ( int j = 0; j < 28; j++ )
+				{
+					RGB rgb_ij = rgb[i * 28 + j];
+					image( j, i, 0 ) = (((float)rgb_ij.r
+							     + rgb_ij.g
+							     + rgb_ij.b)
+							    / (3.0f*255.f));
+				}
+			}
 
 			forward( layers, image );
-            tensor_t<float>& out = layers.back()->out;
-            Sleep( 100 );
-            system( "cls" );
-            for ( int i = 0; i < 10; i++ )
-            {
-                printf( "[%i] %f\n", i, out( i, 0, 0 )*100.0f );
-            }
+			tensor_t<float>& out = layers.back()->out;
+			for ( int i = 0; i < 10; i++ )
+			{
+				printf( "[%i] %f\n", i, out( i, 0, 0 )*100.0f );
+			}
 
-            delete[] data;
-        }
-    }
-    return 0;
+			delete[] data;
+		}
+
+		struct timespec wait;
+		wait.tv_sec = 1;
+		wait.tv_nsec = 0;
+		nanosleep(&wait, nullptr);
+	}
+	return 0;
 }
