@@ -109,7 +109,6 @@ vector<case_t> read_test_cases()
 
 int main()
 {
-
 	vector<case_t> cases = read_test_cases();
 
 	vector<layer_t*> layers;
