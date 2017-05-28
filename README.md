@@ -8,3 +8,10 @@ simple_cnn is written in a mostly C-like manner behind the scenes, doesnt use vi
 Example use on handwritten digit recognition (Youtube Video):
 
 [![Youtube Video](https://img.youtube.com/vi/afLUb6lFTCk/0.jpg)](https://www.youtube.com/watch?v=afLUb6lFTCk)
+
+# Building
+
+On linux, run make.
+
+
+MNIST digits taken from http://yann.lecun.com/exdb/mnist/
